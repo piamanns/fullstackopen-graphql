@@ -9,7 +9,6 @@ const Authors = (props) => {
     refetchQueries: [ { query: ALL_AUTHORS } ]
   })
 
-
   if (!props.show) {
     return null
   }
@@ -46,11 +45,19 @@ const Authors = (props) => {
       <h3>Set birthyear</h3>
       <form onSubmit={submitAuthorData}>
         <div>
-          name
-          <input
-            value={authorName}
-            onChange={({ target }) => setAuthorName(target.value)}
-          />
+          <label>
+            name
+            <select
+              value={authorName}
+              onChange={({ target }) => setAuthorName(target.value)}
+            >
+              {authors.map((a) => (
+                <option key={a.name}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <div>
           born
