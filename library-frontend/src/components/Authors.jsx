@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { ALL_AUTHORS, EDIT_BIRTHYEAR } from '../queries'
 
@@ -8,6 +8,12 @@ const Authors = (props) => {
   const [ editBirthYear ] = useMutation(EDIT_BIRTHYEAR, {
     refetchQueries: [ { query: ALL_AUTHORS } ]
   })
+
+  useEffect(() => {
+    if (props.authors.length > 0) {
+      setAuthorName(props.authors[0].name)
+    }
+  }, [props.authors])
 
   if (!props.show) {
     return null
