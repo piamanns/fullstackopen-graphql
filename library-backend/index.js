@@ -6,6 +6,8 @@ const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
 const Book = require('./models/book')
 const Author = require('./models/author')
+const { GraphQLError } = require('graphql')
+
 
 const MONGODB_URI = process.env.MONGODB_URI
 const PORT = process.env.PORT
@@ -88,19 +90,51 @@ const resolvers = {
       let author = await Author.findOne({ name: args.author })
       if (!author) {
         author = new Author({ name: args.author })
-        await author.save()
+        try {
+          await author.save()
+        } catch (error) {
+          throw new GraphQLError('Creating new author failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.author,
+              error
+            }
+          })
+        }
       }
       const book = new Book({
         ...args,
         author: author
       })
-      return book.save()
+      try {
+        await book.save()
+      } catch (error) {
+        throw new GraphQLError('Adding new book failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.title,
+            error
+          }
+        })
+      }
+      return book
     },
 
     editAuthor: async (root, args) => {
       const author = await Author.findOne({ name: args.name })
-      author.born = args.setBornTo
-      return author.save()
+      try {
+        author.born = args.setBornTo
+        await author.save()
+      } catch (error) {
+        throw new GraphQLError('Editing birth year failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            error
+          }
+        })
+      }
+      return author
     }
   }
 }
