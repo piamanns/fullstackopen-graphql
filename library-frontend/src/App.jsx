@@ -47,7 +47,7 @@ const App = () => {
         token={token}
       />
 
-      <Books show={page === "books"} books={booksResult.data.allBooks} />
+      <Books show={page === "books"} books={booksResult.data.allBooks} key={token} />
 
       <Recommendations show={page === "recommendations"} books={booksResult.data.allBooks} token={token} />
 
