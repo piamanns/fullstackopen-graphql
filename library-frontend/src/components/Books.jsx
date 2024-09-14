@@ -4,10 +4,10 @@ import { BOOKS_BY_GENRE } from '../queries'
 import BookList from './BookList'
 
 const Books = (props) => {
-  const [genre, setGenre] = useState('')
-  const booksByGenreResult = useQuery(BOOKS_BY_GENRE,{
-    variables: { genre },
-    skip: !genre,
+  const [currentGenre, setCurrentGenre] = useState('')
+  const booksByGenreResult = useQuery(BOOKS_BY_GENRE, {
+    variables: { genre: '' },
+    notifyOnNetworkStatusChange: true
   })
 
   if (!props.show) {
@@ -17,8 +17,6 @@ const Books = (props) => {
   if (booksByGenreResult.loading) {
     return <div>Loading data...</div>
   }
-
-  const books = props.books
 
   const genres = props.books.reduce((genreList, book) => {
     if (book.genres) {
@@ -31,23 +29,31 @@ const Books = (props) => {
     return genreList;
   }, []);
 
+  const switchGenre = (genre) => {
+    booksByGenreResult.refetch({ genre })
+    setCurrentGenre(genre)
+  }
+
   return (
     <div>
       <h2>books</h2>
 
-      {genre &&
+      {currentGenre &&
         <div>
-          in genre <strong>{genre}</strong>
+          in genre <strong>{currentGenre}</strong>
         </div>
       }
 
-      <BookList books={genre ? booksByGenreResult.data.allBooks : books} />
+      <BookList books={currentGenre
+        ? booksByGenreResult.data.allBooks
+        : props.books
+      } />
 
       <h3>Filter by genre: </h3>
       {genres.map((genre) => (
-        <button key={genre} onClick={() => setGenre(genre)}>{genre}</button>
+        <button key={genre} onClick={() => switchGenre(genre)}>{genre}</button>
       ))}
-      <button onClick={() => setGenre('')}>all genres</button>
+      <button onClick={() => setCurrentGenre('')}>all genres</button>
     </div>
   )
 }
