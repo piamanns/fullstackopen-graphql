@@ -6,6 +6,7 @@ import Books from "./components/Books";
 import Recommendations from "./components/Recommendations";
 import NewBook from "./components/NewBook";
 import LoginForm from "./components/LoginForm";
+import { updateCachedBooks } from "./utils";
 
 const App = () => {
   const authorsResult = useQuery(ALL_AUTHORS)
@@ -16,9 +17,9 @@ const App = () => {
   const client = useApolloClient()
 
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
-      const bookAdded = data.data.bookAdded
-      window.alert(`${bookAdded.title} added`)
+    onData: ({ data, client }) => {
+      const addedBook = data.data.bookAdded
+      updateCachedBooks(client.cache, { query: ALL_BOOKS }, addedBook)
     }
   })
 
