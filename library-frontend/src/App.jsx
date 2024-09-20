@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useQuery, useApolloClient } from "@apollo/client";
-import { ALL_AUTHORS, ALL_BOOKS } from './queries'
+import { useQuery, useApolloClient, useSubscription } from "@apollo/client";
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED } from './queries'
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import Recommendations from "./components/Recommendations";
@@ -14,6 +14,13 @@ const App = () => {
   const [page, setPage] = useState("authors");
   const [token, setToken] = useState(null)
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const bookAdded = data.data.bookAdded
+      window.alert(`${bookAdded.title} added`)
+    }
+  })
 
   if (authorsResult.loading || booksResult.loading) {
     return <div>Loading data...</div>

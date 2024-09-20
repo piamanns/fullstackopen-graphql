@@ -25,7 +25,7 @@ const Books = (props) => {
           genreList.push(genre);
         }
       })
-    };
+    }
     return genreList;
   }, []);
 
