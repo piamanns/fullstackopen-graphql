@@ -30,12 +30,9 @@ const resolvers = {
       return context.currentUser
     }
   },
-  /*
   Author: {
-    bookCount: (root) => books.reduce((count, book) =>
-      book.author === root.name ? ++count : count, 0)
+    bookCount: (root) => root.authorOf.length
   },
-  */
   Mutation: {
     addBook: async (root, args, context) => {
       const currentUser = context.currentUser
@@ -62,21 +59,29 @@ const resolvers = {
           })
         }
       }
+
       const book = new Book({
         ...args,
         author: author
       })
-      try {
-        await book.save()
-      } catch (error) {
-        throw new GraphQLError('Adding new book failed', {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-            invalidArgs: args.title,
-            error
-          }
+
+      await book.save()
+        .then((book) => {
+          return Author.findOneAndUpdate(
+            { name: author.name },
+            { $push: { authorOf: book._id } }
+          )
         })
-      }
+        .catch ((error) => {
+          throw new GraphQLError('Adding new book failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.title,
+              error
+            }
+          })
+        })
+
       pubsub.publish('BOOK_ADDED', { bookAdded: book })
       return book
     },
